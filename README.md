@@ -8,7 +8,7 @@ Shift address lines around, edit and delete bytes, it will all work itself out o
 ## Install
 ```lua
 {
-    'ArcaneSpecs/hex.nvim'
+    'ArcaneSpecs/HexEditor.nvim'
 }
 
 ```
@@ -19,14 +19,14 @@ This plugin makes use of the `xxd` utility by default, make sure it's on `$PATH`
 
 ## Setup
 ```lua
-require 'hex'.setup()
+require 'HexEditor'.setup()
 ```
 
 ## Use
 ```lua
-require 'hex'.dump()      -- switch to hex view
-require 'hex'.assemble()  -- go back to normal view
-require 'hex'.toggle()    -- switch back and forth
+require 'HexEditor'.dump()      -- switch to hex view
+require 'HexEditor'.assemble()  -- go back to normal view
+require 'HexEditor'.toggle()    -- switch back and forth
 ```
 or their vim cmds
 ```
@@ -43,7 +43,7 @@ nvim -b file1 file2
 ## Config
 ```lua
 -- defaults
-require 'hex'.setup {
+require 'HexEditor'.setup {
 
   -- cli command used to dump hex data
   dump_cmd = 'xxd -g 1 -u',
@@ -64,7 +64,6 @@ require 'hex'.setup {
   end,
 }
 ```
-
 
 ## Credit
 - Original project: [Hex.nvim](https://github.com/RaafatTurki/hex.nvim)

@@ -1,13 +1,14 @@
 local u = require 'hex.utils'
-local augroup_hex_editor = vim.api.nvim_create_augroup('hex_editor', { clear = true })
 
 local M = {}
+
+local augroup_hex_editor = vim.api.nvim_create_augroup('hex_editor', { clear = true })
 
 M.config = {
     dump_cmd = 'xxd -g 1 -u',
     assemble_cmd = 'xxd -r',
     is_file_binary_pre_read = function()
-        binary_ext = { 'out', 'bin', 'png', 'jpg', 'jpeg', 'exe', 'dll', 'pak', 'so', 'a' }
+        local binary_ext = { 'out', 'bin', 'png', 'jpg', 'jpeg', 'exe', 'dll', 'pak', 'so', 'a' }
         -- only work on normal buffers
         if vim.bo.ft ~= "" then return false end
         -- check -b flag
@@ -94,8 +95,8 @@ end
 M.setup = function(options)
     M.config = vim.tbl_deep_extend("force", M.config, options or {})
 
-    dump_program = vim.fn.split(M.config.dump_cmd)[1]
-    assemble_program = vim.fn.split(M.config.assemble_cmd)[1]
+    local dump_program = vim.fn.split(M.config.dump_cmd)[1]
+    local assemble_program = vim.fn.split(M.config.assemble_cmd)[1]
 
     if not u.is_program_executable(dump_program) then return end
     if not u.is_program_executable(assemble_program) then return end
@@ -115,12 +116,16 @@ local calculate_text_position = function(row, col)
     local text_row = row - 1
     -- Only move after space
     local text_col = 60 + math.floor((col - 13) / 3)
+    if col > 56 or col < 10 then
+        text_col = col
+    end
     return text_row, text_col
 end
 
 local namespace_id = vim.api.nvim_create_namespace('hex_highlight')
 vim.cmd('highlight HexEditorHighlight cterm=reverse gui=reverse')
 
+-- Highlights the corresponding text representation of the hex editor.
 local highlight_corresponding_text = function()
     -- Clear the previous highlight.
     vim.api.nvim_buf_clear_namespace(0, namespace_id, 0, -1)
