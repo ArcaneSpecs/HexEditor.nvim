@@ -127,15 +127,15 @@ vim.cmd('highlight HexEditorHighlight cterm=reverse gui=reverse')
 
 -- Highlights the corresponding text representation of the hex editor.
 local highlight_corresponding_text = function()
-    -- Clear the previous highlight.
-    vim.api.nvim_buf_clear_namespace(0, namespace_id, 0, -1)
+    local filetype = vim.bo.filetype
 
-    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-    -- Calculate the corresponding position in the text representation.
-    -- This will depend on how your hex editor is structured.
-    local text_row, text_col = calculate_text_position(row, col)
-    -- Highlight the corresponding position in the text representation.
-    vim.api.nvim_buf_add_highlight(0, namespace_id, 'HexEditorHighlight', text_row, text_col, text_col + 1)
+    -- Check if the current buffer is a hex editor buffer.
+    if filetype == 'xxd' then
+        vim.api.nvim_buf_clear_namespace(0, namespace_id, 0, -1)
+        local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+        local text_row, text_col = calculate_text_position(row, col)
+        vim.api.nvim_buf_add_highlight(0, namespace_id, 'HexEditorHighlight', text_row, text_col, text_col + 1)
+    end
 end
 
 vim.api.nvim_create_autocmd({ 'CursorMoved' }, { group = augroup_hex_editor, callback = highlight_corresponding_text })
