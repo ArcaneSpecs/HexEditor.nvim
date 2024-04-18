@@ -1,4 +1,4 @@
-# Hex.nvim
+# HexEditor.nvim
 ![Lua](https://img.shields.io/badge/Made%20with%20Lua-blueviolet.svg?style=for-the-badge&logo=lua)
 
 Basic hex editor in neovim with byte highlighting.
