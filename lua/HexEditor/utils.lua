@@ -55,10 +55,24 @@ function M.is_program_executable(program)
 end
 
 function M.dettach_all_lsp_clients_from_current_buf()
-    local attached_servers = vim.lsp.get_active_clients({ bufnr = vim.api.nvim_get_current_buf() })
+    local attached_servers = vim.lsp.get_clients({ bufnr = vim.api.nvim_get_current_buf() })
     for _, attached_server in ipairs(attached_servers) do
         attached_server.stop()
     end
 end
+
+M.RELOAD = function(...)
+    return require("plenary.reload").reload_module(...)
+end
+
+M.R = function(name)
+    M.RELOAD(name)
+    return require(name)
+end
+
+-- Reload functions
+vim.api.nvim_create_user_command("ReloadHexEditor", function()
+    M.RELOAD("HexEditor")
+end, {})
 
 return M

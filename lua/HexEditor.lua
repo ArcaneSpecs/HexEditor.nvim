@@ -1,4 +1,38 @@
-local u = require 'hex.utils'
+local u = require 'HexEditor.utils'
+
+local namespace_id = vim.api.nvim_create_namespace('hex_highlight')
+local augroup_hex_editor = vim.api.nvim_create_augroup('hex_editor', { clear = true })
+
+-- For example:
+-- 00000000: 34 00 00 00 00 00 00 00 E9 01 00 00 00 00 00 00  4...............
+--           ^
+-- Would return: 0, 60
+local calculate_text_position = function(row, col)
+    local text_row = row - 1
+    -- NOTE: Only move after space
+    local text_col = 60 + math.floor((col - 13) / 3)
+    -- print(text_row, text_col)
+    return text_row, text_col
+end
+
+local function highlight_corresponding_text()
+    -- Clear the previous highlight
+    vim.api.nvim_buf_clear_namespace(0, namespace_id, 0, -1)
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    -- Calculate the corresponding position in the text representation
+    -- This will depend on how your hex editor is structured
+    local text_row, text_col = calculate_text_position(row, col)
+    -- Highlight the corresponding position in the text representation
+    vim.api.nvim_buf_add_highlight(0, namespace_id, 'HexEditorHighlight', text_row, text_col, text_col + 1)
+end
+
+local function setup_highlight()
+    -- print("Setting up highlighting for HexEditor...")
+    vim.api.nvim_create_autocmd({ 'CursorMoved' },
+        { group = augroup_hex_editor, callback = highlight_corresponding_text })
+
+    vim.cmd('highlight HexEditorHighlight cterm=reverse gui=reverse')
+end
 
 local M = {}
 
@@ -93,6 +127,7 @@ local setup_auto_cmds = function()
 end
 
 M.setup = function(options)
+    -- print("Initializing HexEditor!")
     M.config = vim.tbl_deep_extend("force", M.config, options or {})
 
     local dump_program = vim.fn.split(M.config.dump_cmd)[1]
@@ -106,38 +141,7 @@ M.setup = function(options)
     vim.api.nvim_create_user_command('HexToggle', M.toggle, {})
 
     setup_auto_cmds()
+    setup_highlight()
 end
-
--- For example:
--- 00000000: 34 00 00 00 00 00 00 00 E9 01 00 00 00 00 00 00  4...............
---           ^
--- Would return 0, 60
-local calculate_text_position = function(row, col)
-    local text_row = row - 1
-    -- Only move after space
-    local text_col = 60 + math.floor((col - 13) / 3)
-    if col > 56 or col < 10 then
-        text_col = col
-    end
-    return text_row, text_col
-end
-
-local namespace_id = vim.api.nvim_create_namespace('hex_highlight')
-vim.cmd('highlight HexEditorHighlight cterm=reverse gui=reverse')
-
--- Highlights the corresponding text representation of the hex editor.
-local highlight_corresponding_text = function()
-    local filetype = vim.bo.filetype
-
-    -- Check if the current buffer is a hex editor buffer.
-    if filetype == 'xxd' then
-        vim.api.nvim_buf_clear_namespace(0, namespace_id, 0, -1)
-        local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-        local text_row, text_col = calculate_text_position(row, col)
-        vim.api.nvim_buf_add_highlight(0, namespace_id, 'HexEditorHighlight', text_row, text_col, text_col + 1)
-    end
-end
-
-vim.api.nvim_create_autocmd({ 'CursorMoved' }, { group = augroup_hex_editor, callback = highlight_corresponding_text })
 
 return M
